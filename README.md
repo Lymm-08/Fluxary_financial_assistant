@@ -1,27 +1,79 @@
-# Fluxary - Financial Assistant
+# Fluxary — Financial Assistant
 
-🌎 Language: English | 🇧🇷 [Português](README.pt-BR.md)
+English | [Português (Brasil)](README.pt-BR.md)
 
-This repository contains a thesis project developed in Python, designed to record expenses and income via Telegram, generate reports, and categorize transactions using **AI**.
+Fluxary is a Python Telegram bot for recording personal income and expenses,
+automatically categorizing transactions with the Hugging Face Inference API,
+and viewing financial summaries backed by SQLAlchemy.
 
-## Project Structure
-- `src/` — main source code
-- `main.py` — bot execution
-- `requirements.txt` — project dependencies
-- `run_bot.bat` — startup script
-- `README.md` — project documentation
+## Features
 
-## Objectives
-- Record expenses and income easily through Telegram.
-- Generate both simple and detailed reports (weekly, monthly, and by category).
-- Use AI for automatic transaction categorization.
+- Record income and expenses from natural-language messages.
+- Categorize transactions with Hugging Face AI and keyword-based fallbacks.
+- Review current-month, weekly, monthly, and category-based reports.
+- Persist transactions and account balances in PostgreSQL.
+
+## Technology
+
+Python 3.10+, `python-telegram-bot`, SQLAlchemy, PostgreSQL, Hugging Face
+Inference API, and pytest.
+
+## Project layout
+
+| Path | Purpose |
+| --- | --- |
+| `main.py` | Application entry point |
+| `src/ai/` | AI transaction categorization |
+| `src/commands/` | Telegram commands and message handlers |
+| `src/models/` | SQLAlchemy models and database setup |
+| `src/services/` | Financial report generation |
+| `src/utils/` | Parsing, formatting, and encryption helpers |
+| `tests/` | Automated unit and integration-style tests |
+
+## Setup
+
+1. Install Python 3.10 or newer and PostgreSQL.
+2. Create and activate a virtual environment:
+
+   ```powershell
+   python -m venv .venv
+   .\.venv\Scripts\Activate.ps1
+   ```
+
+3. Install project dependencies:
+
+   ```shell
+   python -m pip install -r requirements.txt
+   ```
+
+4. Copy `.env.example` to `.env` and set your Telegram bot token, PostgreSQL
+   connection string, and (optionally) Hugging Face API token. Keep `.env`
+   private; it is excluded from Git.
+5. Start the bot:
+
+   ```shell
+   python main.py
+   ```
+
+The bot requires a valid `BOT_TOKEN` and a reachable database to start. When
+the Hugging Face token is missing or the API is unavailable, categorization
+falls back to local keyword rules.
+
+## Tests
+
+Install the development and runtime dependencies with
+`python -m pip install -r requirements.txt` (pytest is included), then run:
+
+```shell
+python -m pytest
+```
+
+The automated suite covers transaction categorization with a mocked Hugging
+Face API (including timeouts and malformed responses), message parsing,
+income/expense registration against in-memory SQLite, and the calculations
+and formatting of weekly, monthly, and category reports. Tests do not require
+Telegram or Hugging Face credentials, network access, or PostgreSQL.
 
 ## Demonstration
-![Project Demonstration](contacerta.gif)
 
-## Technologies Used
-- Python 3.10+
-- Telegram Bot API
-- SQLAlchemy
-- PostgreSQL
-- Hugging Face Inference API
+![Fluxary Telegram bot demonstration](contacerta.gif)
