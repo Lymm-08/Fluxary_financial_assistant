@@ -11,10 +11,10 @@ from telegram.ext import ContextTypes, CommandHandler, MessageHandler, filters, 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from functools import partial
 from datetime import datetime
-import re
 
 from src.ai.categorizer import categorize
 from src.utils.formatter import format_money, format_date
+from src.utils.parser import parse_transaction_message
 from src.services.reports import generate_report, generate_month_specific_report
 
 # ==========================
@@ -96,8 +96,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE, db)
             return
 
     # SUBSEÇÃO: Extrair valor e descrição da mensagem
-    match = re.search(r'(\d+(?:[.,]\d+)?)\s+(.+)|(.+)\s+(\d+(?:[.,]\d+)?)', text)
-    if not match:
+    transaction = parse_transaction_message(text)
+    if not transaction:
         await update.message.reply_text("""
 ❓ Não consegui processar sua mensagem.
 
@@ -111,12 +111,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE, db)
 """)
         return
 
-    if match.group(1):
-        valor = float(match.group(1).replace(',', '.'))
-        descricao = match.group(2)
-    else:
-        descricao = match.group(3)
-        valor = float(match.group(4).replace(',', '.'))
+    valor, descricao = transaction
 
     categoria = categorize(descricao)
 

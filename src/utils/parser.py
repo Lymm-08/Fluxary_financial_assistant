@@ -10,6 +10,37 @@
 import re
 from datetime import datetime
 
+
+def parse_transaction_message(text):
+    """Extrai o primeiro valor e mantém o texto restante como descrição."""
+    match = re.search(r'\d+(?:[.,]\d+)*', text)
+    if not match:
+        return None
+
+    amount_text = match.group()
+    if ',' in amount_text and '.' in amount_text:
+        if amount_text.rfind(',') > amount_text.rfind('.'):
+            amount_text = amount_text.replace('.', '').replace(',', '.')
+        else:
+            amount_text = amount_text.replace(',', '')
+    elif amount_text.count(',') > 1:
+        amount_text = amount_text.replace(',', '')
+    elif amount_text.count('.') > 1:
+        decimal_separator = amount_text.rfind('.')
+        amount_text = (
+            amount_text[:decimal_separator].replace('.', '')
+            + amount_text[decimal_separator:]
+        )
+
+    description = f'{text[:match.start()]} {text[match.end():]}'
+    description = re.sub(r'R\$\s*', '', description, flags=re.IGNORECASE)
+    description = re.sub(r'\s+', ' ', description).strip(' \t,;:-')
+    if not description:
+        return None
+
+    return float(amount_text.replace(',', '.')), description
+
+
 # ==========================
 # PARSING DE VALORES MONETÁRIOS
 # ==========================
