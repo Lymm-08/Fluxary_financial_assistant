@@ -1,11 +1,18 @@
-import subprocess
+import logging
+import os
 import sys
 import time
-import traceback
 
 from dotenv import load_dotenv
 
 load_dotenv()
+
+logging.basicConfig(
+    level=os.getenv('LOG_LEVEL', 'INFO').upper(),
+    format='%(asctime)s %(levelname)s %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S',
+)
+logger = logging.getLogger(__name__)
 
 from src.config.config import config
 from src.models.db import init_db
@@ -13,15 +20,15 @@ from src.models.migrate import migrate_db
 
 
 if not config.get('BOT_TOKEN'):
-    print('❌ ERRO: Configure BOT_TOKEN no arquivo .env ou no ambiente.')
+    logger.error('Configure BOT_TOKEN no arquivo .env ou no ambiente.')
     sys.exit(1)
 
 try:
     db_config = init_db(config['DB_URI'])
-    print('✅ Banco de dados inicializado com sucesso')
+    logger.info('Banco de dados inicializado com sucesso')
     migrate_db(db_config['engine'])
 except Exception as error:
-    print(f'❌ ERRO ao inicializar banco: {error}')
+    logger.error('Falha ao inicializar o banco de dados: %s', error)
     sys.exit(1)
 
 try:
@@ -31,26 +38,9 @@ try:
 
     from src.commands.handlers import register_commands
 except ImportError as error:
-    print(f'❌ ERRO: Dependência faltando - {error}')
-    print('💡 Execute: pip install -r requirements.txt')
+    logger.error('Dependência ausente: %s', error)
+    logger.info('Instale as dependências com: pip install -r requirements.txt')
     sys.exit(1)
-
-
-def kill_existing_python_processes():
-    """Tenta encerrar processos Python existentes para evitar conflitos."""
-    try:
-        result = subprocess.run(
-            ['taskkill', '/F', '/IM', 'python.exe', '/T'],
-            capture_output=True,
-            text=True,
-            timeout=10,
-        )
-        if result.returncode == 0:
-            print('✅ Processos Python existentes foram terminados')
-        else:
-            print('ℹ️  Nenhum processo Python encontrado ou não foi possível terminar')
-    except Exception as error:
-        print(f'⚠️  Não foi possível verificar processos Python: {error}')
 
 
 def main():
@@ -59,29 +49,33 @@ def main():
         app = Application.builder().token(config['BOT_TOKEN']).build()
         register_commands(app, db_config)
 
-        print('🚀 Bot Financeiro iniciado!')
-        print('📊 Banco de dados configurado')
-        print('📱 Pronto para receber mensagens...')
-        print('(Pressione Ctrl+C para parar)')
+        logger.info('Bot Financeiro iniciado')
+        logger.info('Banco de dados configurado')
+        logger.info('Pronto para receber mensagens')
+        logger.info('Pressione Ctrl+C para parar')
 
         for attempt in range(3):
             try:
                 app.run_polling(allowed_updates=Update.ALL_TYPES)
                 break
             except Conflict as error:
-                print(f'⚠️  Conflito detectado (tentativa {attempt + 1}/3): {error}')
+                logger.warning(
+                    'Conflito com outra instância do bot (tentativa %d/3): %s',
+                    attempt + 1,
+                    error,
+                )
                 if attempt == 2:
-                    print('❌ Muitas tentativas falharam. Verifique outra instância.')
+                    logger.error(
+                        'Não foi possível iniciar o bot. Feche a outra instância '
+                        'do bot e tente novamente.'
+                    )
                     sys.exit(1)
-                print('🔄 Aguardando 10 segundos para tentar novamente...')
+                logger.info('Tentando novamente em 10 segundos')
                 time.sleep(10)
-                kill_existing_python_processes()
-                time.sleep(2)
     except KeyboardInterrupt:
-        print('\n⏹️  Bot parado pelo usuário')
+        logger.info('Bot parado pelo usuário')
     except Exception as error:
-        print(f'❌ ERRO ao iniciar bot: {error}')
-        traceback.print_exc()
+        logger.exception('Falha ao iniciar o bot: %s', error)
         sys.exit(1)
 
 

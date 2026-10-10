@@ -1,9 +1,11 @@
+import logging
 import os
 from datetime import datetime
 
 from sqlalchemy import Boolean, Column, DateTime, Float, Integer, String, create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
+logger = logging.getLogger(__name__)
 
 Base = declarative_base()
 
@@ -49,13 +51,13 @@ def init_db(db_uri=None):
         'DB_URI',
         'postgresql://localhost:5432/bot_financeiro',
     )
-    print('Conectando ao banco de dados...')
+    logger.info('Conectando ao banco de dados')
 
     engine = create_engine(db_uri, echo=False)
     Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
 
-    print('Banco de dados inicializado com sucesso')
+    logger.info('Banco de dados inicializado com sucesso')
     return {
         'engine': engine,
         'Session': Session,

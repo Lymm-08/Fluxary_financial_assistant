@@ -1,8 +1,10 @@
+import logging
 import os
 from pathlib import Path
 
 from dotenv import load_dotenv
 
+logger = logging.getLogger(__name__)
 
 dotenv_path = Path(__file__).parent.parent.parent / '.env'
 load_dotenv(dotenv_path)
@@ -18,9 +20,9 @@ config = {
 }
 
 if not config['BOT_TOKEN']:
-    print('⚠️  Aviso: BOT_TOKEN não configurado no .env')
+    logger.warning('BOT_TOKEN não configurado no .env')
 
-print('🔧 Configuração carregada:')
-print(f'   - BOT_TOKEN: {"configurado" if config["BOT_TOKEN"] else "NÃO DEFINIDO"}')
-print(f'   - DB_URI: {"configurada" if config["DB_URI"] else "NÃO DEFINIDA"}')
-print(f'   - DEBUG: {config["DEBUG"]}')
+logger.info('Configuração carregada')
+logger.info('BOT_TOKEN: %s', 'configurado' if config['BOT_TOKEN'] else 'NÃO DEFINIDO')
+logger.info('DB_URI: %s', 'configurada' if config['DB_URI'] else 'NÃO DEFINIDA')
+logger.info('DEBUG: %s', config['DEBUG'])

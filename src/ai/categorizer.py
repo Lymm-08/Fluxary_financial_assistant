@@ -7,9 +7,13 @@
 # IMPORTAÇÕES E CONFIGURAÇÕES
 # ==========================
 
-import requests
+import logging
 import os
 import time
+
+import requests
+
+logger = logging.getLogger(__name__)
 
 # SUBSEÇÃO: Configuração da API Hugging Face
 HF_API_URL = "https://api-inference.huggingface.co/models/google/flan-t5-base"
@@ -54,7 +58,7 @@ def query_hf(prompt: str) -> str:
                 data = resp.json()
                 # SUBSEÇÃO: Tratamento de diferentes formatos de resposta
                 if isinstance(data, dict) and 'error' in data:
-                    print(f"⚠️  Tentativa {attempt + 1}: Modelo carregando...")
+                    logger.warning('Tentativa %d: modelo carregando', attempt + 1)
                     time.sleep(2)
                     continue
                 if isinstance(data, list) and 'generated_text' in data[0]:
@@ -62,12 +66,20 @@ def query_hf(prompt: str) -> str:
                 if isinstance(data, str):
                     return data
             else:
-                print(f"⚠️  Tentativa {attempt + 1}: Erro HF ({resp.status_code})")
+                logger.warning(
+                    'Tentativa %d: erro na API Hugging Face (HTTP %d)',
+                    attempt + 1,
+                    resp.status_code,
+                )
         except Exception as e:
-            print(f"⚠️  Tentativa {attempt + 1}: Erro na requisição - {str(e)}")
+            logger.warning(
+                'Tentativa %d: erro na requisição à API Hugging Face: %s',
+                attempt + 1,
+                e,
+            )
         time.sleep(1)
 
-    print("⚠️  Fallback: IA não disponível, usando categorização por palavras-chave")
+    logger.warning('IA indisponível; usando categorização por palavras-chave')
     return ''
 
 # ==========================
@@ -107,4 +119,3 @@ def categorize(description: str) -> str:
 
     # SUBSEÇÃO: Usar fallback se IA falhar
     return fallback_categorize(description)
-

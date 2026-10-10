@@ -7,6 +7,7 @@
 # IMPORTAÇÕES NECESSÁRIAS
 # ==========================
 
+import logging
 from telegram.ext import ContextTypes, CommandHandler, MessageHandler, filters, CallbackQueryHandler
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from functools import partial
@@ -16,6 +17,8 @@ from src.ai.categorizer import categorize
 from src.utils.formatter import format_money, format_date
 from src.utils.parser import parse_transaction_message
 from src.services.reports import generate_report, generate_month_specific_report
+
+logger = logging.getLogger(__name__)
 
 # ==========================
 # SEÇÃO: COMANDOS PRINCIPAIS
@@ -419,6 +422,6 @@ def register_commands(app, db):
     # SUBSEÇÃO: Handler de mensagens livres
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, partial(handle_message, db=db)))
 
-    print('✅ Comandos registrados com sucesso')
+    logger.info('Comandos registrados com sucesso')
 
     
