@@ -59,6 +59,20 @@ The bot requires a valid `BOT_TOKEN` and a reachable database to start. When
 the Hugging Face token is missing or the API is unavailable, categorization
 falls back to local keyword rules.
 
+## Environment variables
+
+Copy `.env.example` to `.env` and replace the example values with your own.
+Never commit `.env` or share its secret values.
+
+| Variable | Purpose | Requirement |
+| --- | --- | --- |
+| `BOT_TOKEN` | Telegram bot authentication token | Required |
+| `DB_URI` | SQLAlchemy database connection URI | Required; defaults to local PostgreSQL |
+| `HF_API_TOKEN` | Hugging Face Inference API token | Optional; keyword fallback is used without it |
+| `ENCRYPTION_KEY` | Key for the encryption helper | Optional |
+| `DEBUG` | Enables the project's debug configuration flag | Optional; defaults to `False` |
+| `LOG_LEVEL` | Logging threshold: `DEBUG`, `INFO`, `WARNING`, `ERROR`, or `CRITICAL` | Optional; defaults to `INFO` |
+
 ## Tests
 
 Install the development and runtime dependencies with

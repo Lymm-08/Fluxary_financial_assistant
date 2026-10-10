@@ -59,6 +59,20 @@ Para iniciar, o bot exige um `BOT_TOKEN` válido e acesso ao banco de dados. Se
 o token da Hugging Face não estiver configurado ou a API estiver indisponível,
 a categorização utiliza as regras locais por palavras-chave.
 
+## Variáveis de ambiente
+
+Copie `.env.example` para `.env` e substitua os valores de exemplo pelos seus.
+Nunca versione o arquivo `.env` nem compartilhe os valores secretos.
+
+| Variável | Finalidade | Obrigatoriedade |
+| --- | --- | --- |
+| `BOT_TOKEN` | Token de autenticação do bot no Telegram | Obrigatória |
+| `DB_URI` | URI de conexão do banco SQLAlchemy | Obrigatória; padrão é PostgreSQL local |
+| `HF_API_TOKEN` | Token da API de inferência Hugging Face | Opcional; sem ele, usa regras locais |
+| `ENCRYPTION_KEY` | Chave para o utilitário de criptografia | Opcional |
+| `DEBUG` | Ativa a configuração de depuração do projeto | Opcional; padrão `False` |
+| `LOG_LEVEL` | Nível de log: `DEBUG`, `INFO`, `WARNING`, `ERROR` ou `CRITICAL` | Opcional; padrão `INFO` |
+
 ## Testes
 
 Instale as dependências de execução e desenvolvimento com
